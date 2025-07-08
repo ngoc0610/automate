@@ -3,7 +3,7 @@ name: Run Notebook and Push
 on:
   schedule:
     # 3:55 PM Asia/Ho_Chi_Minh = 09:00 UTC
-    - cron: '0 9 * * *'
+    - cron: '55 8 * * *'
 
 jobs:
   run-and-push:
