@@ -1,0 +1,43 @@
+name: Run Notebook and Push
+
+on:
+  schedule:
+    # 4:00 PM Asia/Ho_Chi_Minh = 09:00 UTC
+    - cron: '0 9 * * *'
+
+jobs:
+  run-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      # 1) Check out code
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      # 2) Set up Python (bản phù hợp với notebook của bạn)
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      # 3) Install dependencies (chỉnh tên file requirements nếu cần)
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install papermill
+
+      # 4) Execute notebook (ví dụ notebook.ipynb → output.ipynb)
+      - name: Run notebook
+        run: |
+          papermill notebook.ipynb output.ipynb
+
+      # 5) Commit & push lại output.ipynb (và/hoặc overwrite notebook.ipynb nếu bạn chạy in-place)
+      - name: Commit & Push changes
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: main
+          force: false
+          commit_message: "ci: daily run of notebook @ $(date +'%Y-%m-%d %H:%M')"
+          file_pattern: |
+            output.ipynb
